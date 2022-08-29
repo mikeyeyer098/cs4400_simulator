@@ -109,6 +109,9 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
   // TODO: Don't return NULL
   instruction_t* retval = NULL;
 
+  printf("bytes: %x\n", *bytes);
+  printf("numInst: %d\n", num_instructions);
+
   /*
   int i;
   for(i = ...){
