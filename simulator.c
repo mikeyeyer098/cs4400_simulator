@@ -61,7 +61,6 @@ int main(int argc, char** argv)
 
   unsigned int num_instructions = file_size / 4;
 
-
   /****************************************/
   /**** Begin code to modify/implement ****/
   /****************************************/
@@ -72,7 +71,7 @@ int main(int argc, char** argv)
   // Optionally print the decoded instructions for debugging
   // Will not work until you implement decode_instructions
   // Do not call this function in your submitted final version
-  // print_instructions(instructions, num_instructions);
+  print_instructions(instructions, num_instructions);
 
 
   // Once you have completed Part 1 (decoding instructions), uncomment the below block
@@ -106,29 +105,17 @@ int main(int argc, char** argv)
 */
 instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instructions)
 {
-  // TODO: Don't return NULL
-  instruction_t* retval = NULL;
+  instruction_t instructions[num_instructions];
 
-  printf("bytes: %x\n", *bytes);
-  printf("numInst: %d\n", num_instructions);
+  instruction_t* retval = &instructions[0];
 
   int i;
-  unsigned int currentInst;
-  unsigned int shift;
-  for (i = 0; i < num_instructions; i++){
-    shift = 32 * i;
-    printf("shift: %d\n", shift);
-    currentInst = (*bytes << (shift));
-    printf("%x\n", currentInst);
+  for(i = 0; i < num_instructions; i++) {
+    retval[i].opcode = (bytes[i] & 0xF8000000) >> 27;
+    retval[i].first_register = (bytes[i] & 0x7C00000) >> 22;
+    retval[i].second_register = (bytes[i] & 0x3E0000) >> 17;
+    retval[i].immediate = (bytes[i] & 0x7FFF);
   }
-  
-  
-
-  /*
-  int i;
-  for(i = ...){
-    retval[i] = (fill in fields based on raw bits);
-  */
     
   return retval;
 }
