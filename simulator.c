@@ -11,7 +11,7 @@
  *
  * Some code and pseudo code has been provided as a starting point.
  *
- * Completed by: STUDENT-FILL-IN
+ * Completed by: Michael Eyer, u1245499
 */
 
 #include <stdio.h>
