@@ -112,6 +112,18 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
   printf("bytes: %x\n", *bytes);
   printf("numInst: %d\n", num_instructions);
 
+  int i;
+  unsigned int currentInst;
+  unsigned int shift;
+  for (i = 0; i < num_instructions; i++){
+    shift = 32 * i;
+    printf("shift: %d\n", shift);
+    currentInst = (*bytes << (shift));
+    printf("%x\n", currentInst);
+  }
+  
+  
+
   /*
   int i;
   for(i = ...){
