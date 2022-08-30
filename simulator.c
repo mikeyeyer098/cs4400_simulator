@@ -108,12 +108,6 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
 
   int i;
   for(i = 0; i < num_instructions; i++) {
-    printf("current instruction: %x\n", bytes[i]);
-
-    printf("opcode: %d\n", (bytes[i] >> 27) & 0x1F);
-    printf("fr: %d\n", (bytes[i] >> 22) & 0x1F);
-    printf("sr: %d\n", (bytes[i] >> 17) & 0x1F);
-
     retval[i].opcode = ((bytes[i] >> 27) & 0x1F);
     retval[i].first_register = ((bytes[i] >> 22) & 0x1F);
     retval[i].second_register = ((bytes[i] >> 17) & 0x1F);
@@ -150,7 +144,6 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case shrl:
     registers[instr.first_register] = registers[instr.first_register] >> 1;
     break;
-  case
   case printr:
     printf("%d (0x%x)\n", registers[instr.first_register], registers[instr.first_register]);
     break;
