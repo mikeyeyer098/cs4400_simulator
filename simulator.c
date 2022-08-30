@@ -106,7 +106,8 @@ int main(int argc, char** argv)
 instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instructions)
 {
   instruction_t instructions[num_instructions];
-  instruction_t* retval = &instructions[0];
+  instruction_t* retval;
+  retval = malloc(sizeof(instruction_t) * num_instructions);
 
   int i;
   unsigned int* currentAddr;
@@ -118,10 +119,10 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
     currentAddr = bytes + (i * sizeof(instruction_t));
     printf("currentAddr: %x\n", currentAddr);
 
-    instructions[i].opcode = ((bytes[i] & 0xF8000000) >> 27);
-    instructions[i].first_register = ((bytes[i] & 0x7C00000) >> 22);
-    instructions[i].second_register = ((bytes[i] & 0x3E0000) >> 17);
-    instructions[i].immediate = (bytes[i] & 0x7FFF); 
+    retval[i].opcode = ((bytes[i] & 0xF8000000) >> 27);
+    retval[i].first_register = ((bytes[i] & 0x7C00000) >> 22);
+    retval[i].second_register = ((bytes[i] & 0x3E0000) >> 17);
+    retval[i].immediate = (bytes[i] & 0x7FFF); 
   }
 
   printf("first opcode: %x\n", retval[0].opcode);
