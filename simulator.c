@@ -73,9 +73,7 @@ int main(int argc, char** argv)
   // Do not call this function in your submitted final version
   print_instructions(instructions, num_instructions);
 
-
   // Once you have completed Part 1 (decoding instructions), uncomment the below block
-  /*
 
   // Allocate and initialize registers
   int* registers = (int*)malloc(sizeof(int) * NUM_REGS);
@@ -94,7 +92,6 @@ int main(int argc, char** argv)
   {
     program_counter = execute_instruction(program_counter, instructions, registers, memory);
   }
-  */
   
   return 0;
 }
@@ -110,22 +107,18 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
   retval = malloc(sizeof(instruction_t) * num_instructions);
 
   int i;
-  unsigned int* currentAddr;
   for(i = 0; i < num_instructions; i++) {
     printf("current instruction: %x\n", bytes[i]);
 
-    printf("opcode: %x\n", (bytes[i] & 0xF8000000) >> 27);
+    printf("opcode: %d\n", (bytes[i] >> 27) & 0x1F);
+    printf("fr: %d\n", (bytes[i] >> 22) & 0x1F);
+    printf("sr: %d\n", (bytes[i] >> 17) & 0x1F);
 
-    currentAddr = bytes + (i * sizeof(instruction_t));
-    printf("currentAddr: %x\n", currentAddr);
-
-    retval[i].opcode = ((bytes[i] & 0xF8000000) >> 27);
-    retval[i].first_register = ((bytes[i] & 0x7C00000) >> 22);
-    retval[i].second_register = ((bytes[i] & 0x3E0000) >> 17);
-    retval[i].immediate = (bytes[i] & 0x7FFF); 
+    retval[i].opcode = ((bytes[i] >> 27) & 0x1F);
+    retval[i].first_register = ((bytes[i] >> 22) & 0x1F);
+    retval[i].second_register = ((bytes[i] >> 17) & 0x1F);
+    retval[i].immediate = bytes[i] & 0xFFFF;
   }
-
-  printf("first opcode: %x\n", retval[0].opcode);
 
   return retval;
 }
@@ -148,15 +141,23 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case addl_reg_reg:
     registers[instr.second_register] = registers[instr.first_register] + registers[instr.second_register];
     break;
+  case addl_imm_reg:
+    registers[instr.first_register] = registers[instr.first_register] + instr.immediate;
+    break;
+  case imull:
+    registers[instr.second_register] = registers[instr.first_register] * registers[instr.second_register];
+    break;
+  case shrl:
+    registers[instr.first_register] = registers[instr.first_register] >> 1;
+    break;
+  case
   case printr:
     printf("%d (0x%x)\n", registers[instr.first_register], registers[instr.first_register]);
     break;
   case readr:
     scanf("%d", &(registers[instr.first_register]));
     break;
-
-
-  // TODO: Implement remaining instructions
+    
 
   }
 
