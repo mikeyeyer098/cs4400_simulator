@@ -77,11 +77,21 @@ int main(int argc, char** argv)
 
   // Allocate and initialize registers
   int* registers = (int*)malloc(sizeof(int) * NUM_REGS);
-  // TODO: initialize register values
+  // Set all registers values to 0
+  int i;
+  for (i = 0; i < NUM_REGS; i++) {
+    registers[i] = 0x0;
+  }
 
-  // Stack memory is byte-addressed, so it must be a 1-byte type
-  // TODO allocate the stack memory. Do not assign to NULL.
-  unsigned char* memory = NULL;
+  // Set stack pointer register to be 1024 (0x400)
+  registers[6] = 0x400;
+
+  // Stack memory is byte-addressed, so it must be a 1-byte type 
+  unsigned char* memory = malloc(STACK_SIZE);
+  // Set all values in the stack to 0
+  for (i = 0; i < STACK_SIZE; i++) {
+    memory[i] = 0x0;
+  }
 
   // Run the simulation
   unsigned int program_counter = 0;
@@ -102,7 +112,6 @@ int main(int argc, char** argv)
 */
 instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instructions)
 {
-  instruction_t instructions[num_instructions];
   instruction_t* retval;
   retval = malloc(sizeof(instruction_t) * num_instructions);
 
