@@ -124,6 +124,11 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
     retval[i].immediate = bytes[i] & 0xFFFF;
   }
 
+  printf("opcode: %x\nf reg: %x\ns reg: %x\nimm: %x",     retval[i].opcode = ((bytes[i] >> 27) & 0x1F), 
+    retval[i].first_register = ((bytes[i] >> 22) & 0x1F),
+    retval[i].second_register = ((bytes[i] >> 17) & 0x1F),
+    retval[i].immediate = bytes[i] & 0xFFFF);
+
   return retval;
 }
 
@@ -139,32 +144,46 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   
   switch(instr.opcode)
   {
-  //opcode 0
+  //opcode 0, clear
   case subl:
     registers[instr.first_register] = registers[instr.first_register] - instr.immediate;
     break;
-  //opcode 1
-  case addl_reg_reg: //fail (needs movl)
+  //opcode 1, clear
+  case addl_reg_reg:
     registers[instr.second_register] = registers[instr.first_register] + registers[instr.second_register];
     break;
-  //opcode 2
-  case addl_imm_reg: //clear
+  //opcode 2, clear
+  case addl_imm_reg:
     registers[instr.first_register] = registers[instr.first_register] + instr.immediate;
     break;
-  //opcode 3
+  //opcode 3, clear
   case imull:
     registers[instr.second_register] = registers[instr.first_register] * registers[instr.second_register];
     break;
-  //opcode 4
+  //opcode 4 (not tested)
   case shrl:
     registers[instr.first_register] = registers[instr.first_register] >> 1;
     break;
-  //opcode 5
+  //opcode 5 (not tested)
   case movl_reg_reg:
     registers[instr.second_register] = registers[instr.first_register];
     break;
-  //opcode 20
-  case printr: //clear
+  //opcode 6 (not implemented)
+  case movl_deref_reg:
+    printf("movl_deref_reg not implemented");
+    break;
+  //opcode 7 (not implemented)
+  case movl_reg_deref:
+    printf("movl_reg_deref not implemented");
+    break;
+  //opcode 8, clear
+  case movl_imm_reg:
+    registers[instr.first_register] = instr.immediate;
+    break;
+
+
+  //opcode 20, clear
+  case printr: 
     printf("%d (0x%x)\n", registers[instr.first_register], registers[instr.first_register]);
     break;
   //opcode 21
