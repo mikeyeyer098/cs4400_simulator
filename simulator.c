@@ -160,11 +160,11 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case imull:
     registers[instr.second_register] = registers[instr.first_register] * registers[instr.second_register];
     break;
-  //opcode 4 (not tested)
+  //opcode 4, clear
   case shrl:
-    registers[instr.first_register] = registers[instr.first_register] >> 1;
+    registers[instr.first_register] = (unsigned int) registers[instr.first_register] >> 1;
     break;
-  //opcode 5 (not tested)
+  //opcode 5, clear
   case movl_reg_reg:
     registers[instr.second_register] = registers[instr.first_register];
     break;
@@ -180,7 +180,28 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case movl_imm_reg:
     registers[instr.first_register] = instr.immediate;
     break;
+  //opcode 16, (not implemented)
+  case call:
+    registers[sizeof(int) * 6] = registers[sizeof(int) * 6] - 4;
+    memory[registers[sizeof(int) * 6]] = program_counter + 4;
+    program_counter += instr.immediate + 4;
+    return program_counter;
+    break;
+  //opcode 15, (not tested)
+  case jmp:
+    program_counter += instr.immediate + 4;
+    return program_counter;
+    break;
 
+  //opcode 17, (not tested)
+  case ret:
+    if (registers[sizeof(int) * 6] == 1024) {
+      program_counter = 1028;
+    }
+    else {
+      program_counter = memory[registers[sizeof(int) * 6]];
+      registers[sizeof(int) * 6] = registers[sizeof(int) * 6] + 4;
+    }
 
   //opcode 20, clear
   case printr: 
