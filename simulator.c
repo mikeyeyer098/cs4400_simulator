@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   }
 
   // Set stack pointer register to be 1024 (0x400)
-  registers[6] = 0x400;
+  registers[sizeof(int) * 6] = 0x400;
 
   // Stack memory is byte-addressed, so it must be a 1-byte type 
   unsigned char* memory = malloc(STACK_SIZE);
@@ -141,7 +141,8 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   // program_counter is a byte address, but instructions are 4 bytes each
   // divide by 4 to get the index into the instructions array
   instruction_t instr = instructions[program_counter / 4];
-  
+  //printf("program counter: %x, %d, %d\nopcode: %d\nfr: %x\nsr: %x\nimm: %x\n", program_counter, program_counter, program_counter / 4, instr.opcode, instr.first_register, instr.second_register, instr.immediate);
+    //printf("esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
   switch(instr.opcode)
   {
   //opcode 0, clear
@@ -180,29 +181,44 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case movl_imm_reg:
     registers[instr.first_register] = instr.immediate;
     break;
-  //opcode 16, (not implemented)
+  //opcode 15, (not tested)
+  case jmp:
+    program_counter += instr.immediate + 4;
+    return program_counter;
+  //opcode 16, tested
   case call:
     registers[sizeof(int) * 6] = registers[sizeof(int) * 6] - 4;
     memory[registers[sizeof(int) * 6]] = program_counter + 4;
     program_counter += instr.immediate + 4;
     return program_counter;
-    break;
-  //opcode 15, (not tested)
-  case jmp:
-    program_counter += instr.immediate + 4;
-    return program_counter;
-    break;
-
   //opcode 17, (not tested)
   case ret:
-    if (registers[sizeof(int) * 6] == 1024) {
-      program_counter = 1028;
+    //printf("ret has been called!!!! esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
+    //sleep(1);
+    if (registers[sizeof(int) * 6] == 0x400) {
+      exit(0);
     }
     else {
       program_counter = memory[registers[sizeof(int) * 6]];
       registers[sizeof(int) * 6] = registers[sizeof(int) * 6] + 4;
+      return program_counter;
     }
-
+    break;
+  //opcode 18, not tested 
+  case pushl:
+    printf("pushl called\n");
+    registers[sizeof(int) * 6] -= 4;
+    printf("esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
+    memory[registers[sizeof(int) * 6]] = registers[instr.first_register];
+    printf("mem[esp]: %d (0x%x)\n", memory[registers[sizeof(int) * 6]], memory[registers[sizeof(int) * 6]]); 
+    break;
+  //opcode 19, not tested 
+  case popl:
+    printf("popl called\n");
+    
+    registers[instr.first_register] = memory[registers[sizeof(int) * 6]];
+    registers[sizeof(int) * 6] += 4;
+    break;
   //opcode 20, clear
   case printr: 
     printf("%d (0x%x)\n", registers[instr.first_register], registers[instr.first_register]);
