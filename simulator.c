@@ -143,6 +143,10 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   instruction_t instr = instructions[program_counter / 4];
   //printf("program counter: %x, %d, %d\nopcode: %d\nfr: %x\nsr: %x\nimm: %x\n", program_counter, program_counter, program_counter / 4, instr.opcode, instr.first_register, instr.second_register, instr.immediate);
     //printf("esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
+
+  int cmplResult = registers[instr.second_register] - registers[instr.first_register];
+  int cmplSwitch = 0x0;
+
   switch(instr.opcode)
   {
   //opcode 0, clear
@@ -180,6 +184,30 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   //opcode 8, clear
   case movl_imm_reg:
     registers[instr.first_register] = instr.immediate;
+    break;
+  //opcode 9, (not implemented)
+  case cmpl:
+    //cf
+    if ((unsigned int) registers[instr.second_register] < (unsigned int) registers[instr.first_register]) {
+      cmplSwitch = cmplSwitch | 0x1;
+    }
+    //zf
+    if (cmplResult == 0) {
+      cmplSwitch = cmplSwitch | 0x40;
+    }
+    //sf
+    if (cmplResult >> 31 & 0x1) {
+      cmplSwitch = cmplSwitch | 0x80;
+    }
+    //of
+    if (registers[instr.second_register] > 0 && registers[instr.first_register] < 0 && cmplResult < 0) {
+      cmplSwitch = cmplSwitch | 0x800;
+    } else if (registers[instr.second_register] < 0 && registers[instr.first_register] > 0 && cmplResult > 0) {
+      cmplSwitch = cmplSwitch | 0x800;
+    }
+
+    //printf("cmpl called, switch: 0x%x, result: 0x%x\n", cmplSwitch, cmplResult);
+    registers[16] = cmplSwitch;
     break;
   //opcode 15, (not tested)
   case jmp:
