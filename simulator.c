@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   }
 
   // Set stack pointer register to be 1024 (0x400)
-  registers[sizeof(int) * 6] = 0x400;
+  registers[6] = 0x400;
 
   // Stack memory is byte-addressed, so it must be a 1-byte type 
   unsigned char* memory = malloc(STACK_SIZE);
@@ -187,37 +187,37 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
     return program_counter;
   //opcode 16, tested
   case call:
-    registers[sizeof(int) * 6] = registers[sizeof(int) * 6] - 4;
-    memory[registers[sizeof(int) * 6]] = program_counter + 4;
+    registers[6] = registers[6] - 4;
+    memory[registers[6]] = program_counter + 4;
     program_counter += instr.immediate + 4;
     return program_counter;
   //opcode 17, (not tested)
   case ret:
     //printf("ret has been called!!!! esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
     //sleep(1);
-    if (registers[sizeof(int) * 6] == 0x400) {
+    if (registers[6] == 0x400) {
       exit(0);
     }
     else {
-      program_counter = memory[registers[sizeof(int) * 6]];
-      registers[sizeof(int) * 6] = registers[sizeof(int) * 6] + 4;
+      program_counter = memory[registers[6]];
+      registers[6] = registers[6] + 4;
       return program_counter;
     }
     break;
   //opcode 18, not tested 
   case pushl:
     printf("pushl called\n");
-    registers[sizeof(int) * 6] -= 4;
-    printf("esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
-    memory[registers[sizeof(int) * 6]] = registers[instr.first_register];
-    printf("mem[esp]: %d (0x%x)\n", memory[registers[sizeof(int) * 6]], memory[registers[sizeof(int) * 6]]); 
+    registers[6] -= 4;
+    printf("esp?: %d (0x%x)\n", registers[6], registers[6]);
+    memory[registers[6]] = registers[instr.first_register];
+    printf("mem[esp]: %d (0x%x)\n", memory[registers[6]], memory[registers[6]]); 
     break;
   //opcode 19, not tested 
   case popl:
     printf("popl called\n");
     
-    registers[instr.first_register] = memory[registers[sizeof(int) * 6]];
-    registers[sizeof(int) * 6] += 4;
+    registers[instr.first_register] = memory[registers[6]];
+    registers[6] += 4;
     break;
   //opcode 20, clear
   case printr: 
