@@ -151,6 +151,7 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   int zf = (registers[16] & 0x40) >> 6;
   int sf = (registers[16] & 0x80) >> 7;
   int of = (registers[16] & 0x800) >> 11;
+
   switch(instr.opcode)
   {
   //opcode 0, clear
@@ -179,11 +180,11 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
     break;
   //opcode 6 (not implemented)
   case movl_deref_reg:
-    registers[instr.second_register] = memory[instr.first_register + instr.immediate];
+    printf("movl_deref_reg not implemented");
     break;
   //opcode 7 (not implemented)
   case movl_reg_deref:
-    registers[instr.first_register] = (int16_t) instr.immediate;
+    printf("movl_reg_deref not implemented");
     break;
   //opcode 8, clear
   case movl_imm_reg:
