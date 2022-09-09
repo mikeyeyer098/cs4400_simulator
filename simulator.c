@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   // Optionally print the decoded instructions for debugging
   // Will not work until you implement decode_instructions
   // Do not call this function in your submitted final version
-  print_instructions(instructions, num_instructions);
+  //print_instructions(instructions, num_instructions);
 
   // Once you have completed Part 1 (decoding instructions), uncomment the below block
 
@@ -182,15 +182,15 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
     break;
   //opcode 6 (not implemented)
   case movl_deref_reg:
-    registers[instr.second_register] = memory[instr.first_register + instr.immediate];
+    registers[instr.second_register] = memory[registers[instr.first_register] + instr.immediate];
     break;
   //opcode 7 (not implemented)
   case movl_reg_deref:
-    registers[instr.first_register] = (int16_t) instr.immediate;
+    memory[registers[instr.second_register] + instr.immediate] = registers[instr.first_register];
     break;
   //opcode 8, clear
   case movl_imm_reg:
-    registers[instr.first_register] = instr.immediate;
+    registers[instr.first_register] = (unsigned char) instr.immediate;
     break;
   //opcode 9, (not implemented)
   case cmpl:
