@@ -147,6 +147,10 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   int cmplResult = registers[instr.second_register] - registers[instr.first_register];
   int cmplSwitch = 0x0;
 
+  int cf = (registers[16] & 0x1) >> 0;
+  int zf = (registers[16] & 0x40) >> 6;
+  int sf = (registers[16] & 0x80) >> 7;
+  int of = (registers[16] & 0x800) >> 11;
   switch(instr.opcode)
   {
   //opcode 0, clear
@@ -208,6 +212,36 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
 
     //printf("cmpl called, switch: 0x%x, result: 0x%x\n", cmplSwitch, cmplResult);
     registers[16] = cmplSwitch;
+    break;
+  //opcode 10
+  case je:
+    if (zf) {
+      return program_counter + instr.immediate + 4;
+    }
+    break;
+  //opcode 11
+  case jl:
+    if (sf ^ of) {
+      return program_counter + instr.immediate + 4;
+    }
+    break;
+  //opcode 12
+  case jle:
+    if ((sf ^ of) | zf) {
+      return program_counter + instr.immediate + 4;
+    }
+    break;
+  //opcode 13
+  case jge:
+    if (~(sf | of) & 0x1) {
+      return program_counter + instr.immediate + 4;
+    }
+    break;
+  //opcode 14
+  case jbe:
+    if (cf | zf) {
+      return program_counter + instr.immediate + 4;
+    }
     break;
   //opcode 15, (not tested)
   case jmp:
