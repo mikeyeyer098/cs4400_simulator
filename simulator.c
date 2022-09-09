@@ -124,10 +124,12 @@ instruction_t* decode_instructions(unsigned int* bytes, unsigned int num_instruc
     retval[i].immediate = bytes[i] & 0xFFFF;
   }
 
+  /*
   printf("opcode: %x\nf reg: %x\ns reg: %x\nimm: %x",     retval[i].opcode = ((bytes[i] >> 27) & 0x1F), 
     retval[i].first_register = ((bytes[i] >> 22) & 0x1F),
     retval[i].second_register = ((bytes[i] >> 17) & 0x1F),
     retval[i].immediate = bytes[i] & 0xFFFF);
+    */
 
   return retval;
 }
@@ -146,6 +148,11 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
 
   int cmplResult = registers[instr.second_register] - registers[instr.first_register];
   int cmplSwitch = 0x0;
+  int cf = (registers[16] & 0x1) >> 0;
+  int zf = (registers[16] & 0x40) >> 6;
+  int sf = (registers[16] & 0x80) >> 7;
+  int of = (registers[16] & 0x800) >> 11;
+  //printf("flags: %d, %d, %d, %d\n", cf, zf, sf, of);
 
   switch(instr.opcode)
   {
@@ -175,11 +182,11 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
     break;
   //opcode 6 (not implemented)
   case movl_deref_reg:
-    printf("movl_deref_reg not implemented");
+    registers[instr.second_register] = memory[instr.first_register + instr.immediate];
     break;
   //opcode 7 (not implemented)
   case movl_reg_deref:
-    printf("movl_reg_deref not implemented");
+    registers[instr.first_register] = (int16_t) instr.immediate;
     break;
   //opcode 8, clear
   case movl_imm_reg:
@@ -189,37 +196,67 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
   case cmpl:
     //cf
     if ((unsigned int) registers[instr.second_register] < (unsigned int) registers[instr.first_register]) {
-      cmplSwitch = cmplSwitch | 0x1;
+      cmplSwitch = cmplSwitch | (0x1 << 0);
     }
     //zf
     if (cmplResult == 0) {
-      cmplSwitch = cmplSwitch | 0x40;
+      cmplSwitch = cmplSwitch | (0x1 << 6);
     }
     //sf
     if (cmplResult >> 31 & 0x1) {
-      cmplSwitch = cmplSwitch | 0x80;
+      cmplSwitch = cmplSwitch | (0x1 << 7);
     }
     //of
     if (registers[instr.second_register] > 0 && registers[instr.first_register] < 0 && cmplResult < 0) {
-      cmplSwitch = cmplSwitch | 0x800;
+      cmplSwitch = cmplSwitch | (0x1 << 11);
     } else if (registers[instr.second_register] < 0 && registers[instr.first_register] > 0 && cmplResult > 0) {
-      cmplSwitch = cmplSwitch | 0x800;
+      cmplSwitch = cmplSwitch | (0x1 << 11);
     }
 
     //printf("cmpl called, switch: 0x%x, result: 0x%x\n", cmplSwitch, cmplResult);
     registers[16] = cmplSwitch;
     break;
-  //opcode 15, (not tested)
+  //opcode 10
+  case je:
+    if (zf) {
+      return program_counter += instr.immediate + 4;
+    }
+    break;
+  //opcode 11
+  case jl:
+    if (sf ^ of) {
+      return program_counter += instr.immediate + 4;
+    }
+    break;
+  //opcode 12
+  case jle:
+    if ((sf ^ of) | zf) {
+      return program_counter += instr.immediate + 4;
+    }
+    break;
+  //opcode 13
+  case jge:
+    if (~(sf ^ of) & 0x1) {
+      return program_counter += instr.immediate + 4;
+    }
+    break;
+  //opcode 14
+  case jbe:
+    if (cf | zf) {
+      return program_counter += instr.immediate + 4;
+    }
+    break;
+  //opcode 15
   case jmp:
     program_counter += instr.immediate + 4;
     return program_counter;
-  //opcode 16, tested
+  //opcode 16
   case call:
     registers[6] = registers[6] - 4;
     memory[registers[6]] = program_counter + 4;
     program_counter += instr.immediate + 4;
     return program_counter;
-  //opcode 17, (not tested)
+  //opcode 17
   case ret:
     //printf("ret has been called!!!! esp?: %d (0x%x)\n", registers[sizeof(int) * 6], registers[sizeof(int) * 6]);
     //sleep(1);
@@ -232,22 +269,21 @@ unsigned int execute_instruction(unsigned int program_counter, instruction_t* in
       return program_counter;
     }
     break;
-  //opcode 18, not tested 
+  //opcode 18
   case pushl:
-    printf("pushl called\n");
+    //printf("pushl called\n");
     registers[6] -= 4;
-    printf("esp?: %d (0x%x)\n", registers[6], registers[6]);
+    //printf("esp?: %d (0x%x)\n", registers[6], registers[6]);
     memory[registers[6]] = registers[instr.first_register];
-    printf("mem[esp]: %d (0x%x)\n", memory[registers[6]], memory[registers[6]]); 
+    //printf("mem[esp]: %d (0x%x)\n", memory[registers[6]], memory[registers[6]]); 
     break;
-  //opcode 19, not tested 
+  //opcode 19
   case popl:
-    printf("popl called\n");
-    
+    //printf("popl called\n");
     registers[instr.first_register] = memory[registers[6]];
     registers[6] += 4;
     break;
-  //opcode 20, clear
+  //opcode 20
   case printr: 
     printf("%d (0x%x)\n", registers[instr.first_register], registers[instr.first_register]);
     break;
